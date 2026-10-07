@@ -2,8 +2,7 @@
 
 A standalone Telegram bot that watches tracked artists on **Spotify only** and
 alerts on new albums, singles and guest appearances released in the last five
-days. It shares no code and no database with the iTunes bot in `../iTunes/`, so
-the two can be deployed, restarted or deleted independently.
+days.
 
 ## Files
 
@@ -35,7 +34,7 @@ SPOTIFY_CLIENT_SECRET=6f2b91...       # from the Spotify developer dashboard
 
 `BOT_TOKEN` must be a token created for **this** bot with @BotFather. Two bots
 polling with the same token both receive `409 Conflict` and every command
-silently fails, so do not reuse the iTunes bot's token.
+silently fails.
 
 `SPOTIFY_CLIENT_SECRET` is the sensitive value, so treat it like a password and
 keep it out of Telegram, screenshots and chat.

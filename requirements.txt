@@ -1,4 +1,6 @@
+# Python 3.9+ (uses zoneinfo from the standard library)
 python-telegram-bot[job-queue]>=20.0
 python-dotenv>=1.0.0
 requests>=2.31.0
+# Provides IANA time zone data on hosts without a system tz database (e.g. Windows)
 tzdata>=2024.1

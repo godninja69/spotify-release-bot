@@ -19,7 +19,13 @@ client id and secret from the dashboard, and the artist list is entered by hand.
 
 ## Configuration
 
-Everything lives in `.env`, which is never committed:
+Everything lives in `.env`, which is never committed. Copy
+`.env.example` as a template:
+
+```bash
+cp .env.example .env
+# then edit .env with your real values
+```
 
 ```env
 BOT_TOKEN=123456789:AA...            # from @BotFather
@@ -152,3 +158,14 @@ All have working defaults and none need to be set: `DATABASE_PATH`,
 claimed alert destination. It is created empty and rebuilt empty on every start:
 there is no migration from an older database and no import path, because the
 artist list is entered by hand through the bot. Delete the file to start over.
+
+## License
+
+MIT. See [LICENSE](https://github.com/Kilo-Org/Song-Release-Telegram-Alert-BOT/blob/main/LICENSE).
+
+## Security
+
+This is a public repository. **Never** commit real bot tokens, Spotify API
+credentials, or any other secret. The `.env` file is git-ignored; use
+`.env.example` as a template. Anyone holding a bot token can claim the alert
+destination by sending the bot a private `/start`, so treat tokens like passwords.

@@ -74,9 +74,6 @@ def start_health_server():
     server.serve_forever()
 
 
-threading.Thread(target=start_health_server, daemon=True).start()
-
-
 def _int_setting(name: str, default: int, minimum: int = 0) -> int:
     raw = os.getenv(name, str(default))
     try:
@@ -777,6 +774,12 @@ def main() -> None:
             "No alert destination yet. Send the bot a private /start and it will "
             "remember that account."
         )
+
+    # Start health server for Render keep-alive (UptimeRobot pings)
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    LOGGER.info("Health server started on port %s", port)
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))

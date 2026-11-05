@@ -4,7 +4,7 @@ This bot tracks artists on Spotify only and sends one Telegram alert per new
 album, single or guest appearance released in the last five days. It starts from
 an empty database: artists arrive through ``/add``, ``/bulkadd`` or a file
 upload, and there is no stored history to replay. The scan runs through
-``application.job_queue.run_daily`` at 05:35 IST; there is no polling loop and no
+``application.job_queue.run_daily`` at 05:15 IST; there is no polling loop and no
 long-running timer.
 """
 
@@ -48,10 +48,10 @@ LOGGER = logging.getLogger(__name__)
 
 SCAN_JOB_NAME = "spotify-daily-scan"
 
-# The scan runs once a day at 05:35 India Standard Time, independent of the
+# The scan runs once a day at 05:15 India Standard Time, independent of the
 # server's own time zone. IST has no daylight saving, so the offset is stable.
 SCAN_TIMEZONE = ZoneInfo("Asia/Kolkata")
-SCAN_TIME = dt_time(5, 35, tzinfo=SCAN_TIMEZONE)
+SCAN_TIME = dt_time(5, 15, tzinfo=SCAN_TIMEZONE)
 
 # Alerts go to the bot administrator's own account, learned from the first
 # private /start and persisted, so no chat ID has to be configured.
@@ -311,7 +311,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         lines.append("")
 
         lines.append("🕐 <b>Scan schedule</b>")
-        lines.append("┗ Daily at 05:35 IST (Asia/Kolkata)")
+        lines.append("┗ Daily at 05:15 IST (Asia/Kolkata)")
         lines.append(f"┗ Next run: {_next_scan_hint(context)}")
         lines.append("")
 
@@ -719,7 +719,7 @@ async def _scan(context: ContextTypes.DEFAULT_TYPE) -> tuple[int, int]:
 
 
 async def daily_scan_job(context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Run one full Spotify pass, scheduled daily at 05:35 IST."""
+    """Run one full Spotify pass, scheduled daily at 05:15 IST."""
     await _scan(context)
 
 
@@ -800,7 +800,7 @@ def main() -> None:
             "Job queue is unavailable; install python-telegram-bot[job-queue]."
         )
 
-    # Once a day at 05:35 IST. The time is timezone-aware, so this is 05:35 in
+    # Once a day at 05:15 IST. The time is timezone-aware, so this is 05:15 in
     # India regardless of where the server is hosted.
     app.job_queue.run_daily(
         daily_scan_job,
@@ -809,8 +809,25 @@ def main() -> None:
         # Never stack scans: a slow run must be skipped, not queued behind.
         job_kwargs={"max_instances": 1, "coalesce": True},
     )
+    # Catch-up: if today's scheduled scan time has already passed (e.g. the
+    # Render free-tier instance was hibernated), run it immediately on startup
+    # once polling begins so no day is skipped entirely.
+    now = datetime.now(SCAN_TIMEZONE)
+    today_scan = now.replace(
+        hour=SCAN_TIME.hour, minute=SCAN_TIME.minute, second=0, microsecond=0
+    )
+    if now > today_scan:
+        LOGGER.info(
+            "Missed today's 05:15 IST scan (now %s); scheduling catch-up run.",
+            now.strftime("%Y-%m-%d %H:%M:%S %Z"),
+        )
+        app.job_queue.run_once(
+            daily_scan_job,
+            when=1,
+            name="spotify-daily-catchup",
+        )
     LOGGER.info(
-        "Spotify Release Radar online | %d artist(s) tracked | daily scan at 05:35 IST",
+        "Spotify Release Radar online | %d artist(s) tracked | daily scan at 05:15 IST",
         len(store.get_artist_rows()),
     )
     app.run_polling()

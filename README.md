@@ -8,7 +8,7 @@ days.
 
 | File | Purpose |
 | --- | --- |
-| `spotify_bot.py` | Telegram command handlers and the daily 05:35 IST scan |
+| `spotify_bot.py` | Telegram command handlers and the daily 05:15 IST scan |
 | `spotify_database.py` | SQLite storage for subscriptions, seen releases and settings |
 | `spotify_music_client.py` | Spotify Web API client, auth, rate limiting, filtering, dedup |
 | `spotify_radar.db` | Local database (the server keeps its own copy) |
@@ -41,7 +41,7 @@ keep it out of Telegram, screenshots and chat.
 
 Neither the chat ID nor the scan time is configured. Alerts go to whichever
 account sends the bot a private `/start` first, and the scan always runs at
-05:35 IST. Anything already set as a real environment variable on the server
+05:15 IST. Anything already set as a real environment variable on the server
 overrides `.env`.
 
 ## Authentication
@@ -75,8 +75,8 @@ python spotify_bot.py
 
 ## Scheduling
 
-The scan is registered with `application.job_queue.run_daily` at **05:35
-Asia/Kolkata**. The time is timezone-aware, so it fires at 05:35 in India no
+The scan is registered with `application.job_queue.run_daily` at **05:15
+Asia/Kolkata**. The time is timezone-aware, so it fires at 05:15 in India no
 matter where the server is hosted. Spotify meters quota per app, so one pass a
 day keeps request volume far below the limit.
 
